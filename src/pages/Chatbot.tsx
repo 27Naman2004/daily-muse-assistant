@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { processMessage, type Message } from "@/services/chatbotService";
 
 const Chatbot = () => {
@@ -67,14 +67,14 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden border">
+    <div className="container mx-auto px-4 py-8 bg-gray-900">
+      <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700">
         <div className="p-4 bg-primary text-primary-foreground">
           <h1 className="text-xl font-semibold">Daily Muse Assistant</h1>
           <p className="text-sm opacity-90">Your AI planning companion</p>
         </div>
         
-        <div className="h-[60vh] overflow-y-auto p-4 bg-secondary/20">
+        <div className="h-[60vh] overflow-y-auto p-4 bg-gray-800">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -97,14 +97,14 @@ const Chatbot = () => {
           </div>
         </div>
         
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-gray-700 bg-gray-800">
           <form onSubmit={handleSendMessage} className="flex gap-2">
             <Input
               placeholder="Ask about daily planning..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               disabled={isLoading}
-              className="flex-1"
+              className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
             <Button type="submit" disabled={isLoading || inputValue.trim() === ''}>
               {isLoading ? (
@@ -117,33 +117,33 @@ const Chatbot = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto mt-6 p-4 bg-secondary rounded-lg">
+      <div className="max-w-4xl mx-auto mt-6 p-4 bg-gray-800 rounded-lg border border-gray-700 text-white">
         <h2 className="text-lg font-medium mb-2">Example questions you can ask:</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <Button 
             variant="outline" 
-            className="justify-start h-auto py-2 text-left"
+            className="justify-start h-auto py-2 text-left border-gray-600 hover:bg-gray-700"
             onClick={() => setInputValue("How can I plan my day for maximum productivity?")}
           >
             How can I plan my day for maximum productivity?
           </Button>
           <Button 
             variant="outline" 
-            className="justify-start h-auto py-2 text-left"
+            className="justify-start h-auto py-2 text-left border-gray-600 hover:bg-gray-700"
             onClick={() => setInputValue("What's the best way to prioritize my tasks?")}
           >
             What's the best way to prioritize my tasks?
           </Button>
           <Button 
             variant="outline" 
-            className="justify-start h-auto py-2 text-left"
-            onClick={() => setInputValue("How can I overcome procrastination?")}
+            className="justify-start h-auto py-2 text-left border-gray-600 hover:bg-gray-700"
+            onClick={() => setInputValue("Can you help me create a daily schedule?")}
           >
-            How can I overcome procrastination?
+            Can you help me create a daily schedule?
           </Button>
           <Button 
             variant="outline" 
-            className="justify-start h-auto py-2 text-left"
+            className="justify-start h-auto py-2 text-left border-gray-600 hover:bg-gray-700"
             onClick={() => setInputValue("What's a good morning routine for productivity?")}
           >
             What's a good morning routine for productivity?

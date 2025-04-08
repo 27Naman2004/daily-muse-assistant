@@ -98,10 +98,27 @@
 
 @layer utilities {
   .chat-bubble-user {
-    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-none p-4;
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-none p-4 shadow-md;
   }
   
   .chat-bubble-bot {
-    @apply bg-secondary text-secondary-foreground rounded-2xl rounded-bl-none p-4;
+    @apply bg-gray-700 text-white rounded-2xl rounded-bl-none p-4 shadow-md;
   }
+}
+
+/* Chatbot dark theme specific styles */
+.chatbot-dark {
+  @apply bg-gray-900 text-white;
+}
+
+.chatbot-container {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.chatbot-input {
+  @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400;
+}
+
+.chatbot-button {
+  @apply bg-primary hover:bg-primary/90 text-white;
 }
