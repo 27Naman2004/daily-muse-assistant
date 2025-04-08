@@ -153,7 +153,7 @@ export const processMessage = (message: string): Promise<string> => {
 
       // Default response within domain but not matched to any template
       resolve(
-        "That's a great question about daily planning! I suggest starting by prioritizing your tasks, scheduling breaks, and using a time-blocking approach. Would you like help creating a to-do list or schedule for today?"
+        "Error: I am a chatbot reolated to DailyPlanner ask Qn related to daily palnning and Routine."
       );
     }, 1000); // simulate network delay
   });
