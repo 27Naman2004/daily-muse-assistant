@@ -71,6 +71,9 @@ const domainResponses = [
   }
 ];
 
+// Google API Key for enhanced responses (NOTE: This should ideally be stored securely, not hardcoded)
+const API_KEY = "AIzaSyAIYfZ3GcVQXhkXmJ6IEdn3MbVIF5qN8LU";
+
 // Helper function to check if message matches any keywords
 const matchesKeywords = (message: string, keywords: string[]): boolean => {
   const lowercaseMessage = message.toLowerCase();
