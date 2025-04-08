@@ -1,5 +1,4 @@
-
-// Predefined responses for our domain-specific chatbot
+// ------------------- Domain-specific Responses -------------------
 const domainResponses = [
   {
     keywords: ["hello", "hi", "hey", "greetings"],
@@ -71,19 +70,15 @@ const domainResponses = [
   }
 ];
 
-// Google API Key for enhanced responses (NOTE: This should ideally be stored securely, not hardcoded)
-const API_KEY = "AIzaSyAIYfZ3GcVQXhkXmJ6IEdn3MbVIF5qN8LU";
-
-// Helper function to check if message matches any keywords
+// ------------------- Keywords Checkers -------------------
 const matchesKeywords = (message: string, keywords: string[]): boolean => {
   const lowercaseMessage = message.toLowerCase();
   return keywords.some(keyword => lowercaseMessage.includes(keyword));
 };
 
-// Check if a message is outside our domain (not related to daily planning/productivity)
 const isOutsideDomain = (message: string): boolean => {
   const nonPlanningKeywords = [
-    "politics", "sports", "movie", "music", "religion", "dating", 
+    "politics", "sports", "movie", "music", "religion", "dating",
     "games", "gaming", "cryptocurrency", "invest", "stocks",
     "recipe", "cook", "medical", "health condition", "diagnosis",
     "weather", "news", "travel", "hotel", "flight", "vacation",
@@ -92,20 +87,42 @@ const isOutsideDomain = (message: string): boolean => {
     "pets", "animals", "chemistry", "physics", "math", "science",
     "language", "translate", "geography", "country", "entertainment"
   ];
-  
-  const lowercaseMessage = message.toLowerCase();
 
-  // If it matches planning-related keywords, it's in our domain
-  const containsPlanningKeywords = domainResponses.some(item => 
-    matchesKeywords(message, item.keywords)
+  const lowercaseMessage = message.toLowerCase();
+  const containsPlanningKeywords = domainResponses.some(item =>
+    matchesKeywords(lowercaseMessage, item.keywords)
   );
 
   if (containsPlanningKeywords) return false;
 
-  // If it contains any unrelated keyword, it's out of domain
   return nonPlanningKeywords.some(keyword => lowercaseMessage.includes(keyword));
 };
 
+// ------------------- Google API Call -------------------
+const API_KEY = "AIzaSyAIYfZ3GcVQXhkXmJ6IEdn3MbVIF5qN8LU";
+
+const callGoogleAI = async (prompt: string): Promise<string> => {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=${API_KEY}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      prompt: {
+        messages: [{ content: prompt }]
+      },
+      temperature: 0.7,
+      candidateCount: 1
+    })
+  });
+
+  const data = await response.json();
+  return data?.candidates?.[0]?.content ?? "Hmm, I couldn’t generate a helpful response right now.";
+};
+
+// ------------------- Chat Message Type -------------------
 export type Message = {
   id: string;
   content: string;
@@ -113,48 +130,43 @@ export type Message = {
   timestamp: Date;
 };
 
-// Process incoming message and return a response
-export const processMessage = (message: string): Promise<string> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const lower = message.toLowerCase();
+// ------------------- Chatbot Logic -------------------
+export const processMessage = async (message: string): Promise<string> => {
+  const lower = message.toLowerCase();
 
-      // Handle off-domain input
-      if (isOutsideDomain(message)) {
-        resolve("⚠️ I'm specialized in daily planning and productivity. I can't help with that topic, but I'd love to assist with organizing your day, improving your focus, or creating a schedule. Would you like help with that?");
-        return;
-      }
+  if (isOutsideDomain(message)) {
+    return "⚠️ I'm specialized in daily planning and productivity. I can't help with that topic, but I'd love to assist with organizing your day, improving your focus, or creating a schedule. Would you like help with that?";
+  }
 
-      // Match a domain-specific response
-      for (const item of domainResponses) {
-        if (matchesKeywords(message, item.keywords)) {
-          resolve(item.response);
-          return;
-        }
-      }
+  for (const item of domainResponses) {
+    if (matchesKeywords(message, item.keywords)) {
+      return item.response;
+    }
+  }
 
-      // Fallback: user is likely asking for help creating a custom plan
-      if (
-        lower.includes("my schedule") || 
-        lower.includes("plan for me") || 
-        lower.includes("help me plan") ||
-        (lower.includes("create") && lower.includes("plan"))
-      ) {
-        resolve(
-          "I'd be happy to help you create a personalized daily plan! To get started, could you tell me:\n\n" +
-          "1. What time do you wake up and go to bed?\n" +
-          "2. What are your main priorities or tasks for today?\n" +
-          "3. Any fixed appointments or meetings?\n" +
-          "4. When are you most productive during the day?\n\n" +
-          "Once I have this info, I can generate a tailored schedule for you."
-        );
-        return;
-      }
+  if (
+    lower.includes("my schedule") ||
+    lower.includes("plan for me") ||
+    lower.includes("help me plan") ||
+    (lower.includes("create") && lower.includes("plan"))
+  ) {
+    return (
+      "I'd be happy to help you create a personalized daily plan! To get started, could you tell me:\n\n" +
+      "1. What time do you wake up and go to bed?\n" +
+      "2. What are your main priorities or tasks for today?\n" +
+      "3. Any fixed appointments or meetings?\n" +
+      "4. When are you most productive during the day?\n\n" +
+      "Once I have this info, I can generate a tailored schedule for you."
+    );
+  }
 
-      // Default response within domain but not matched to any template
-      resolve(
-        "Error: I am a chatbot reolated to DailyPlanner ask Qn related to daily palnning and Routine."
-      );
-    }, 1000); // simulate network delay
-  });
+  try {
+    const dynamicResponse = await callGoogleAI(
+      `As a productivity assistant chatbot, answer this domain-specific query about daily planning: "${message}"`
+    );
+    return dynamicResponse;
+  } catch (err) {
+    console.error("Google API Error:", err);
+    return "⚠️ I had trouble generating a response right now. Please try again or ask something else related to daily planning.";
+  }
 };
