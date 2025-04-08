@@ -1,3 +1,4 @@
+
 // Predefined responses for our domain-specific chatbot
 const domainResponses = [
   {
@@ -70,15 +71,14 @@ const domainResponses = [
   }
 ];
 
-// Check if message contains keywords
+// Helper function to check if message matches any keywords
 const matchesKeywords = (message: string, keywords: string[]): boolean => {
   const lowercaseMessage = message.toLowerCase();
   return keywords.some(keyword => lowercaseMessage.includes(keyword));
 };
 
-// Check if a message is outside our domain
+// Check if a message is outside our domain (not related to daily planning/productivity)
 const isOutsideDomain = (message: string): boolean => {
-  // List of non-planning related topics
   const nonPlanningKeywords = [
     "politics", "sports", "movie", "music", "religion", "dating", 
     "games", "gaming", "cryptocurrency", "invest", "stocks",
@@ -91,16 +91,15 @@ const isOutsideDomain = (message: string): boolean => {
   ];
   
   const lowercaseMessage = message.toLowerCase();
-  
-  // First check if message contains any planning-related keywords
+
+  // If it matches planning-related keywords, it's in our domain
   const containsPlanningKeywords = domainResponses.some(item => 
     matchesKeywords(message, item.keywords)
   );
-  
-  // If it contains planning keywords, it's in our domain
+
   if (containsPlanningKeywords) return false;
-  
-  // Otherwise, check if it contains off-topic keywords or seems unrelated to planning
+
+  // If it contains any unrelated keyword, it's out of domain
   return nonPlanningKeywords.some(keyword => lowercaseMessage.includes(keyword));
 };
 
@@ -111,36 +110,48 @@ export type Message = {
   timestamp: Date;
 };
 
+// Process incoming message and return a response
 export const processMessage = (message: string): Promise<string> => {
   return new Promise((resolve) => {
-    // Simulate API delay
     setTimeout(() => {
-      // Check if the message is outside our domain
+      const lower = message.toLowerCase();
+
+      // Handle off-domain input
       if (isOutsideDomain(message)) {
-        resolve("I'm sorry, but I'm specialized in daily planning and productivity topics. I can't provide information on that subject. Is there something about planning your day, managing your schedule, or improving productivity that I can help with?");
+        resolve("⚠️ I'm specialized in daily planning and productivity. I can't help with that topic, but I'd love to assist with organizing your day, improving your focus, or creating a schedule. Would you like help with that?");
         return;
       }
-      
-      // Check for domain-specific responses
+
+      // Match a domain-specific response
       for (const item of domainResponses) {
         if (matchesKeywords(message, item.keywords)) {
           resolve(item.response);
           return;
         }
       }
-      
-      // If the message appears to be asking for a personalized plan or schedule
-      if (message.toLowerCase().includes("my schedule") || 
-          message.toLowerCase().includes("plan for me") || 
-          message.toLowerCase().includes("help me plan") ||
-          (message.toLowerCase().includes("create") && message.toLowerCase().includes("plan"))) {
-        
-        resolve("I'd be happy to help you create a personalized daily plan! To provide the most helpful schedule, I need to know:\n\n1. What time do you typically wake up and go to sleep?\n2. What are your main priorities for the day?\n3. Do you have any fixed commitments or meetings?\n4. When are you typically most productive?\n\nOnce you provide this information, I can suggest a detailed schedule tailored to your specific needs.");
+
+      // Fallback: user is likely asking for help creating a custom plan
+      if (
+        lower.includes("my schedule") || 
+        lower.includes("plan for me") || 
+        lower.includes("help me plan") ||
+        (lower.includes("create") && lower.includes("plan"))
+      ) {
+        resolve(
+          "I'd be happy to help you create a personalized daily plan! To get started, could you tell me:\n\n" +
+          "1. What time do you wake up and go to bed?\n" +
+          "2. What are your main priorities or tasks for today?\n" +
+          "3. Any fixed appointments or meetings?\n" +
+          "4. When are you most productive during the day?\n\n" +
+          "Once I have this info, I can generate a tailored schedule for you."
+        );
         return;
       }
-      
-      // Default response if no specific match but still in domain
-      resolve("That's an interesting question about daily planning. While organizing your day, it's important to prioritize tasks, schedule breaks, and maintain a healthy work-life balance. For effective planning, consider using the time-blocking method, setting clear priorities with techniques like the Eisenhower Matrix, and building consistent routines. Would you like more specific advice on a particular aspect of daily planning?");
-    }, 1000);
+
+      // Default response within domain but not matched to any template
+      resolve(
+        "That's a great question about daily planning! I suggest starting by prioritizing your tasks, scheduling breaks, and using a time-blocking approach. Would you like help creating a to-do list or schedule for today?"
+      );
+    }, 1000); // simulate network delay
   });
 };
